@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">MpApp</string>
+    <string name="app_name">YourVoteMatters</string>
+    <string name="search_hint">hint</string>
+    <string name="app_label">search</string>
 </resources>
