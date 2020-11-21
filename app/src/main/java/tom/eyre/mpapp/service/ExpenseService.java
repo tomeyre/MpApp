@@ -16,36 +16,41 @@ import org.jsoup.nodes.Element;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import lombok.SneakyThrows;
-import tom.eyre.yourvotematters.data.ExpenseByYear;
-import tom.eyre.yourvotematters.data.ExpenseCalculatedResponse;
-import tom.eyre.yourvotematters.data.ExpenseResponse;
-import tom.eyre.yourvotematters.data.ExpenseType;
-import tom.eyre.yourvotematters.util.GetCsvUtil;
-import tom.eyre.yourvotematters.util.GitUtil;
+import tom.eyre.mpapp.data.ExpenseByYear;
+import tom.eyre.mpapp.data.ExpenseCalculatedResponse;
+import tom.eyre.mpapp.data.ExpenseResponse;
+import tom.eyre.mpapp.data.ExpenseType;
+import tom.eyre.mpapp.database.MpDatabase;
+import tom.eyre.mpapp.entity.ExpenseEntity;
+import tom.eyre.mpapp.entity.MpEntity;
+import tom.eyre.mpapp.util.GetCsvUtil;
+import tom.eyre.mpapp.util.GitUtil;
+
+import static tom.eyre.mpapp.util.Constants.SEVEN_DAYS;
 
 public class ExpenseService {
 
+    private static final Logger log = Logger.getLogger(String.valueOf(ExpenseService.class));
     private static final String URL = "http://www.theipsa.org.uk";
     private static final String COSTS = "/mp-costs/your-mp/";
 
     private static final String MP_COST_ID_SEARCH = "\"MpSummaries\":[{\"Id\":";
 
     @SneakyThrows
-    public JSONArray getMembersOfParliament(String username, String password, String name) {
-        String firstName = name.split(" ")[name.split(" ").length-2];
-        String lastName = name.split(" ")[name.split(" ").length-1];
-        String json = checkGit(username,password,firstName + "-" + lastName);
-        if(!json.equalsIgnoreCase("error") && !json.equalsIgnoreCase("fnf")) return new JSONArray(json);
-        Integer costsId = getCostsId(URL + COSTS + firstName + "-" + lastName);
+    public JSONArray getMembersOfParliament(MpEntity mp) {
+        Integer costsId = getCostsId(URL + COSTS + mp.getForename() + "-" + mp.getSurname());
+        if(costsId == -1){costsId = getCostsId(URL + COSTS + mp.getFullName().trim().replaceAll(" +", " ").replaceAll(" ", "-"));}
         if(costsId == -1){return new JSONArray();}
         String url = "https://www.theipsa.org.uk/download/downloadclaimscsvformp/" + costsId;
-        System.out.println(url);
+        log.info(url);
         JSONArray jsonArray = getJsonFromCsv(new GetCsvUtil().getJSONFromUrl(url));
-        new GitUtil().storeFile(jsonArray.toString(), firstName + "-" + lastName);
+
         return jsonArray;
     }
 
@@ -53,19 +58,86 @@ public class ExpenseService {
         return new GitUtil().getFile(username, password,name + ".json");
     }
 
-    public String calculateExpensesPerYear(String username, String password, String name) throws JsonProcessingException {
-        JSONArray jsonArray = getMembersOfParliament(username,password,name);
+    public ExpenseCalculatedResponse calculateExpensesPerYear(MpEntity mp, MpDatabase mpDatabase) throws JsonProcessingException {
+        if(haveCurrentExpenses(mp.getId(), mpDatabase)) return calculateExpenseEntities((ArrayList<ExpenseEntity>) mpDatabase.mpDao().getExpensesByMpId(mp.getId()));
+        JSONArray jsonArray = getMembersOfParliament(mp);
         try {
             for(int i = jsonArray.length() - 1; i > 0; i--){
                 if(jsonArray.getJSONObject(i).getString("Year").equalsIgnoreCase("")) {jsonArray.remove(i);}
             }
             ObjectMapper mapper = new ObjectMapper();
             ArrayList<ExpenseResponse> expenseResponses = mapper.readValue(jsonArray.toString(), new TypeReference<ArrayList<ExpenseResponse>>() { });
-            return new JSONObject(mapper.writeValueAsString(calculateExpenses(expenseResponses))).toString();
+            buildAndSaveEntities(expenseResponses,mpDatabase,mp.getId());
+            return calculateExpenses(expenseResponses);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return "";
+        return null;
+    }
+
+    private Boolean haveCurrentExpenses(Integer id, MpDatabase mpDatabase){
+        Long expenseDate = mpDatabase.mpDao().getExpenseDate(id);
+        return expenseDate != null ? System.currentTimeMillis() - expenseDate < SEVEN_DAYS : false;
+    }
+
+    private ExpenseCalculatedResponse calculateExpenseEntities(ArrayList<ExpenseEntity> expenses){
+        ExpenseCalculatedResponse response = new ExpenseCalculatedResponse();
+        for(ExpenseEntity expense : expenses){
+            if(responseContainsExpenseYearAlready(response, expense)){
+                for(ExpenseByYear expenseByYear : response.getExpenseByYears()){
+                    if(expenseByYear.getYear().equalsIgnoreCase(expense.getYear() instanceof String ? expense.getYear() : "")){
+                        if(expenseYearContainsExpenseTypeAlready(expenseByYear.getExpenseTypes(),expense.getExpenseType())){
+                            for(ExpenseType type : expenseByYear.getExpenseTypes()){
+                                if(type.getType().equalsIgnoreCase(expense.getExpenseType())){
+                                    type.setTotalSpent(type.getTotalSpent() + (expense.getAmountClaimed() - (expense.getAmountNotPaid() != null ? expense.getAmountNotPaid() : 0d)));
+                                }
+                            }
+                        }else{
+                            expenseByYear.getExpenseTypes().add(new ExpenseType(expense.getExpenseType(), (expense.getAmountClaimed() - (expense.getAmountNotPaid() != null ? expense.getAmountNotPaid() : 0d))));
+                        }
+                    }
+                }
+            }else{
+                List<ExpenseType> expenseTypes = new ArrayList<>();
+                expenseTypes.add(new ExpenseType(expense.getExpenseType(), (expense.getAmountClaimed() - (expense.getAmountNotPaid() != null ? expense.getAmountNotPaid() : 0d))));
+                response.getExpenseByYears().add(new ExpenseByYear(expense.getYear() instanceof String ? expense.getYear() : "", expenseTypes));
+            }
+        }
+
+        return response;
+    }
+
+    private void buildAndSaveEntities(ArrayList<ExpenseResponse> responses, MpDatabase mpDatabase, Integer id){
+        ArrayList<ExpenseEntity> expenseEntities = new ArrayList<>();
+        for(ExpenseResponse response : responses){
+            ExpenseEntity expenseEntity = new ExpenseEntity();
+            expenseEntity.setMpId(id);
+            expenseEntity.setYear(response.getYear() instanceof String ? response.getYear().toString() : "");
+            expenseEntity.setDate(response.getDate());
+            expenseEntity.setClaimNo(response.getClaimNo());
+            expenseEntity.setMpName(response.getMpsName());
+            expenseEntity.setMpsConstituency(response.getMpsConstituency());
+            expenseEntity.setCategory(response.getCategory());
+            expenseEntity.setExpenseType(response.getExpenseType());
+            expenseEntity.setShortDescription(response.getShortDescription());
+            expenseEntity.setDetails(response.getDetails());
+            expenseEntity.setJourneyType(response.getJourneyType());
+            expenseEntity.setFrom(response.getTraveledFrom());
+            expenseEntity.setTo(response.getTraveledTo());
+            expenseEntity.setTravel(response.getTravelClass());
+            expenseEntity.setNights(response.getNights());
+            expenseEntity.setMileage(response.getMileage());
+            expenseEntity.setAmountClaimed(response.getAmountClaimed());
+            expenseEntity.setAmountPaid(response.getAmountPaid());
+            expenseEntity.setAmountRepaid(response.getAmountRepaid());
+            expenseEntity.setStatus(response.getStatus());
+            expenseEntity.setReasonIfNotPaid(response.getReasonIfNotPaid());
+            expenseEntity.setSupplyMonth(response.getSupplyMonth());
+            expenseEntity.setSupplyPeriod(response.getSupplyPeriod());
+            expenseEntity.setLastUpdatedTimestamp(new Date().getTime());
+            expenseEntities.add(expenseEntity);
+        }
+        mpDatabase.mpDao().insertAllExpenses(expenseEntities);
     }
 
     private ExpenseCalculatedResponse calculateExpenses(ArrayList<ExpenseResponse> expenses){
@@ -91,12 +163,24 @@ public class ExpenseService {
                 response.getExpenseByYears().add(new ExpenseByYear(expense.getYear() instanceof String ? expense.getYear().toString() : "", expenseTypes));
             }
         }
+
         return response;
     }
 
     private Boolean expenseYearContainsExpenseTypeAlready(List<ExpenseType> types, String typeString){
         for(ExpenseType type : types){
             if(type.getType().equalsIgnoreCase(typeString)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Boolean responseContainsExpenseYearAlready(ExpenseCalculatedResponse response, ExpenseEntity expense){
+        for(ExpenseByYear expenseByYear : response.getExpenseByYears()){
+            if(expenseByYear.getYear() != null &&
+                    expense.getYear() != null &&
+                    expenseByYear.getYear().equalsIgnoreCase(expense.getYear() instanceof String ? expense.getYear().toString() : "")){
                 return true;
             }
         }
@@ -130,7 +214,7 @@ public class ExpenseService {
 
     public Integer getCostsId(String url) {
 
-        int retries = 3;
+        int retries = 1;
         while (retries-- > 0) {
             try {
                 Document doc = Jsoup.connect(url).timeout(90000).get();

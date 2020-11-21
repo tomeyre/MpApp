@@ -10,7 +10,7 @@ public class MpCurrentStatusResponse {
     public MpCurrentStatusResponse(){}
 
     @JsonProperty(value = "StartDate")
-    private String startDate;
+    private Object startDate;
 
     @JsonProperty(value = "@IsActive")
     private Boolean active;

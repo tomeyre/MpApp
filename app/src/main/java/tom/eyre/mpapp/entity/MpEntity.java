@@ -6,6 +6,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import lombok.Data;
 import lombok.NonNull;
@@ -21,8 +22,14 @@ public class MpEntity implements Serializable {
     @NonNull
     private Integer id;
 
-    @ColumnInfo(name = "name")
-    private String name;
+    @ColumnInfo(name = "DisplayAs")
+    private String fullName;
+
+    @ColumnInfo(name = "forename")
+    private String forename;
+
+    @ColumnInfo(name = "surname")
+    private String surname;
 
     @ColumnInfo(name = "party")
     private String party;
@@ -45,6 +52,20 @@ public class MpEntity implements Serializable {
     @ColumnInfo(name = "houseStartDate")
     private String houseStartDate;
 
-//    @Embedded
-//    private VoteEntity votes;
+    @ColumnInfo(name = "houseEndDate")
+    private String houseEndDate;
+
+    @ColumnInfo(name = "bio")
+    private String bio;
+
+    @ColumnInfo(name = "twitter")
+    private String twitterUrl;
+
+    @ColumnInfo(name = "homePage")
+    private String homePage;
+
+    @ColumnInfo(name = "lastUpdatedTs")
+    @androidx.annotation.NonNull
+    private Long lastUpdatedTimestamp;
+
 }

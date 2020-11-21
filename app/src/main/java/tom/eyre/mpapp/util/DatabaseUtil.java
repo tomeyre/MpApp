@@ -5,7 +5,7 @@ import android.content.Context;
 import androidx.room.Room;
 
 import lombok.Data;
-import tom.eyre.yourvotematters.database.MpDatabase;
+import tom.eyre.mpapp.database.MpDatabase;
 
 @Data
 public class DatabaseUtil {

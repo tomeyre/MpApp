@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/mpSelectFragment"
+        android:icon="@drawable/mp"
+        android:title="@string/title_mp_select" />
+
+    <item
+        android:id="@+id/mpVsFragment"
+        android:icon="@drawable/mp"
+        android:title="@string/title_mp_compare" />
+
+<!--    <item-->
+<!--        android:id="@+id/partySelectFragment"-->
+<!--        android:icon="@drawable/party"-->
+<!--        android:title="@string/title_party_select" />-->
+
+    <item
+        android:id="@+id/quizFragment"
+        android:icon="@drawable/quiz"
+        android:title="@string/title_quiz" />
+
+</menu>

@@ -1,18 +1,27 @@
 package tom.eyre.mpapp.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.cardview.widget.CardView;
+import androidx.core.graphics.ColorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import tom.eyre.yourvotematters.R;
-import tom.eyre.yourvotematters.entity.MpEntity;
+import tom.eyre.mpapp.R;
+import tom.eyre.mpapp.activity.MpSelectActivity;
+import tom.eyre.mpapp.entity.MpEntity;
 
 public class ListViewAdapter extends BaseAdapter {
 
@@ -22,17 +31,23 @@ public class ListViewAdapter extends BaseAdapter {
     private LayoutInflater inflater;
     private List<MpEntity> mps = null;
     private ArrayList<MpEntity> arraylist;
+    private MpSelectActivity mpSelectActivity;
 
-    public ListViewAdapter(Context context, List<MpEntity> mps) {
+    public ListViewAdapter(Context context, List<MpEntity> mps, MpSelectActivity mpSelectActivity){
         this.mContext = context;
         this.mps = mps;
         this.inflater = LayoutInflater.from(mContext);
         this.arraylist = new ArrayList<>();
         this.arraylist.addAll(mps);
+        this.mpSelectActivity = mpSelectActivity;
     }
 
     public class ViewHolder {
         TextView name;
+        TextView party;
+        TextView constituency;
+        LinearLayout colorParty;
+        Button compareBtn;
     }
 
     @Override
@@ -54,32 +69,80 @@ public class ListViewAdapter extends BaseAdapter {
         final ViewHolder holder;
         if (view == null) {
             holder = new ViewHolder();
-            view = inflater.inflate(R.layout.list_view_item, null);
+            view = inflater.inflate(R.layout.list_view_search_item, null);
             // Locate the TextViews in listview_item.xml
-            holder.name = (TextView) view.findViewById(R.id.name);
+            holder.constituency = view.findViewById(R.id.constituency);
+            holder.name = view.findViewById(R.id.name);
+            holder.colorParty = view.findViewById(R.id.colorParty);
+            holder.compareBtn = view.findViewById(R.id.compareBtn);
             view.setTag(holder);
         } else {
             holder = (ViewHolder) view.getTag();
         }
         // Set the results into TextViews
-        holder.name.setText(mps.get(position).getName());
+        holder.name.setText(mps.get(position).getFullName());
+        if (mps.get(position).getActive() &&
+                !mps.get(position).getMpFor().equalsIgnoreCase("speaker") &&
+                !mps.get(position).getMpFor().equalsIgnoreCase("life peer")) {
+            holder.constituency.setText("Current MP for " + mps.get(position).getMpFor());
+        } else if (!mps.get(position).getMpFor().equalsIgnoreCase("speaker") &&
+                !mps.get(position).getMpFor().equalsIgnoreCase("life peer")) {
+            holder.constituency.setText("Ex-MP for " + mps.get(position).getMpFor());
+        } else {
+            holder.constituency.setText(mps.get(position).getMpFor());
+        }
+        holder.party = view.findViewById(R.id.party);
+        holder.party.setText(mps.get(position).getParty());
+        if (mps.get(position).getActive()) {
+            int color;
+            try {
+                color = mContext.getResources().getColor(R.color.parlimentGreen, null);//getColor(mps.get(position));
+            } catch (Exception e) {
+                color = mContext.getResources().getColor(R.color.parlimentGreen, null);
+            }
+            GradientDrawable gd = new GradientDrawable(
+                    GradientDrawable.Orientation.RIGHT_LEFT,
+                    new int[]{ColorUtils.setAlphaComponent(color, 0xaa),
+                            0x00000000});
+            gd.setCornerRadius(0f);
+            holder.colorParty.setBackground(gd);
+        }else {
+            holder.colorParty.setBackgroundColor(mContext.getResources().getColor(R.color.white, null));
+        }
+        holder.compareBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mpSelectActivity.updateList(mps.get(position));
+            }
+        });
+        if(mpSelectActivity.alreadySelectedOne()){
+            holder.compareBtn.setVisibility(View.INVISIBLE);
+        }else{
+            holder.compareBtn.setVisibility(View.VISIBLE);
+        }
         return view;
     }
 
     // Filter Class
     public void filter(String charText) {
-        charText = charText.toLowerCase(Locale.getDefault());
-        mps.clear();
-        if (charText.length() == 0) {
-            mps.addAll(arraylist);
-        } else {
-            for (MpEntity mp : arraylist) {
-                if (mp.getName().toLowerCase(Locale.getDefault()).contains(charText)) {
-                    mps.add(mp);
+        if (charText != null) {
+            charText = charText.toLowerCase(Locale.getDefault());
+            mps.clear();
+            if (charText.length() == 0) {
+                mps.addAll(arraylist);
+            } else {
+                for (MpEntity mp : arraylist) {
+                    if ((mp.getFullName()).toLowerCase(Locale.getDefault()).contains(charText)) {
+                        mps.add(mp);
+                    } else if (mp.getMpFor().toLowerCase(Locale.getDefault()).contains(charText)) {
+                        mps.add(mp);
+                    } else if (mp.getParty().toLowerCase(Locale.getDefault()).contains(charText)) {
+                        mps.add(mp);
+                    }
                 }
             }
+            notifyDataSetChanged();
         }
-        notifyDataSetChanged();
     }
 
 }

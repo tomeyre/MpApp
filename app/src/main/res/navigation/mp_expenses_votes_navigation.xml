@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/mpDetailsFragment">
+
+    <fragment
+        android:id="@+id/mpDetailsFragment"
+        android:name="tom.eyre.mpapp.fragment.ui.mpexpensesvotes.mpdetails.MpDetails"
+        android:label="@string/title_mp_details"
+        tools:layout="@layout/fragment_mp_details">
+        <argument
+            android:name="MpEntity.class"
+            android:defaultValue="null"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/expensesFragment"
+        android:name="tom.eyre.mpapp.fragment.ui.mpexpensesvotes.mpexpenses.ExpensesFragment"
+        android:label="@string/title_expenses"
+        tools:layout="@layout/fragment_expenses">
+        <argument
+            android:name="MpEntity.class"
+            android:defaultValue="null"
+            app:argType="string" />
+    </fragment>
+
+
+<!--    <fragment-->
+<!--        android:id="@+id/navigation_notifications"-->
+<!--        android:name="tom.eyre.mpapp.fragment.ui.mpexpensesvotes.mpvotes.NotificationsFragment"-->
+<!--        android:label="@string/title_vote"-->
+<!--        tools:layout="@layout/fragment_notifications">-->
+<!--        <argument-->
+<!--            android:name="MpEntity.class"-->
+<!--            android:defaultValue="null"-->
+<!--            app:argType="string" />-->
+<!--    </fragment>-->
+</navigation>

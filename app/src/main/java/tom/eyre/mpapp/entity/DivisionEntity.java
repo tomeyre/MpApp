@@ -5,6 +5,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.Date;
+
 import lombok.Data;
 
 @Data
@@ -24,6 +26,7 @@ public class DivisionEntity {
     @ColumnInfo(name = "date")
     private String date;
 
-//    @Embedded
-//    private VoteEntity votes;
+    @ColumnInfo(name = "lastUpdatedTs")
+    @NonNull
+    private Long lastUpdatedTimestamp;
 }

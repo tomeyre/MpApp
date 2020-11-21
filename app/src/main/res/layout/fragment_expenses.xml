@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".fragment.ui.mpexpensesvotes.mpexpenses.ExpensesFragment">
+
+    <RelativeLayout
+        android:id="@+id/loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/loading"
+        android:translationZ="2dp">
+
+        <ProgressBar
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:translationZ="3dp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:visibility="invisible"
+        android:id="@+id/expense"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/topView"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        app:cardBackgroundColor="@color/parlimentGreen"/>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="176dp"
+        android:layout_height="176dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="43dp"
+        app:cardPreventCornerOverlap="true"
+        android:translationZ="2dp"
+        app:cardCornerRadius="88dp">
+
+        <ImageView
+            android:id="@+id/mpImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </androidx.cardview.widget.CardView>
+
+    <org.eazegraph.lib.charts.PieChart xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/piechart"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="30dp"
+        android:translationZ="2dp" />
+
+    <TextView
+        android:layout_below="@+id/piechart"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:text="name"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:id="@+id/mpName"
+        android:textColor="@color/black"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:layout_margin="5dp"
+        android:id="@+id/yearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/mpName"
+        android:weightSum="5">
+
+        <Button
+            android:shadowColor="#000"
+            android:shadowRadius="3.0"
+            android:id="@+id/previous"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="PREV"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@color/parlimentGreen"
+            android:layout_gravity="center"
+            android:textSize="15sp" />
+
+        <TextView
+            android:padding="10dp"
+            android:id="@+id/expenseYear"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="hint\nhint"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:shadowColor="#000"
+            android:shadowRadius="3.0"
+            android:id="@+id/next"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="NEXT"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@color/parlimentGreen"
+            android:layout_gravity="center"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+
+    <!--Creating another linear layout -->
+    <!-- to display pie chart details -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/expenseRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/yearLayout"
+        android:layout_margin="10dp"
+        android:scrollbars="vertical" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

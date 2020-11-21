@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/mpSelectFragment">
+
+    <fragment
+        android:id="@+id/mpSelectFragment"
+        android:name="tom.eyre.mpapp.fragment.ui.mppartyquiz.mpselect.MpSelectFragment"
+        tools:layout="@layout/fragment_mp_select">
+        <argument
+            android:name="vs"
+            android:defaultValue="false"
+            app:argType="boolean" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mpVsFragment"
+        android:name="tom.eyre.mpapp.fragment.ui.mppartyquiz.mpselect.MpSelectFragment"
+        tools:layout="@layout/fragment_mp_select">
+        <argument
+            android:name="vs"
+            android:defaultValue="true"
+            app:argType="boolean" />
+    </fragment>
+
+<!--    <fragment-->
+<!--        android:id="@+id/partySelectFragment"-->
+<!--        android:name="tom.eyre.mpapp.fragment.ui.mppartyquiz.partyselect.PartySelectFragment"-->
+<!--        tools:layout="@layout/fragment_notifications">-->
+<!--    </fragment>-->
+
+
+    <fragment
+        android:id="@+id/quizFragment"
+        android:name="tom.eyre.mpapp.fragment.ui.mppartyquiz.quiz.QuizFragment"
+        tools:layout="@layout/fragment_questions">
+    </fragment>
+</navigation>

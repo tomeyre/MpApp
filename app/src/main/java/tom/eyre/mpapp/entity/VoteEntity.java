@@ -5,6 +5,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.Date;
+
 import lombok.Data;
 import lombok.NonNull;
 
@@ -31,7 +33,8 @@ public class VoteEntity {
     @ColumnInfo(name = "result")
     private String result;
 
-//    @SuppressWarnings(RoomWarnings.PRIMARY_KEY_FROM_EMBEDDED_IS_DROPPED)
-//    @Embedded()
-//    private DivisionEntity divisionDetails;
+    @ColumnInfo(name = "lastUpdatedTs")
+    @androidx.annotation.NonNull
+    private Long lastUpdatedTimestamp;
+
 }

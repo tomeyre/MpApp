@@ -59,4 +59,7 @@ public class MpResponse {
     @JsonProperty(value = "MemberFrom")
     private String memberFrom;
 
+    @JsonProperty(value = "BasicDetails")
+    private MpBasicDetailsResponse basicDetails;
+
 }

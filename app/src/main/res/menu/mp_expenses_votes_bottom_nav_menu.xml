@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/home"
+        android:icon="@drawable/ic_home_black_24dp"
+        android:title="@string/title_home" />
+
+    <item
+        android:id="@+id/mpDetailsFragment"
+        android:icon="@drawable/mp"
+        android:title="@string/title_mp_details" />
+
+    <item
+        android:id="@+id/expensesFragment"
+        android:icon="@drawable/expense"
+        android:title="@string/title_expenses" />
+
+<!--    <item-->
+<!--        android:id="@+id/navigation_notifications"-->
+<!--        android:icon="@drawable/vote"-->
+<!--        android:title="@string/title_vote" />-->
+
+</menu>

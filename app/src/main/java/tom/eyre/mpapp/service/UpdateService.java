@@ -1,107 +1,207 @@
 package tom.eyre.mpapp.service;
 
+import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
+
+import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.ScanRequest;
+import com.amazonaws.services.dynamodbv2.model.ScanResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
-import tom.eyre.yourvotematters.data.DivisionResponse;
-import tom.eyre.yourvotematters.data.MpResponse;
-import tom.eyre.yourvotematters.data.VoteResponse;
-import tom.eyre.yourvotematters.database.MpDatabase;
-import tom.eyre.yourvotematters.entity.DivisionEntity;
-import tom.eyre.yourvotematters.entity.MpEntity;
-import tom.eyre.yourvotematters.entity.VoteEntity;
-import tom.eyre.yourvotematters.util.HttpConnectUtil;
+import tom.eyre.mpapp.R;
+import tom.eyre.mpapp.data.BillResponse;
+import tom.eyre.mpapp.data.BillSponsor;
+import tom.eyre.mpapp.data.DivisionResponse;
+import tom.eyre.mpapp.data.MpResponse;
+import tom.eyre.mpapp.data.VoteResponse;
+import tom.eyre.mpapp.database.MpDatabase;
+import tom.eyre.mpapp.entity.BillsEntity;
+import tom.eyre.mpapp.entity.DivisionEntity;
+import tom.eyre.mpapp.entity.MpEntity;
+import tom.eyre.mpapp.entity.QuestionEntity;
+import tom.eyre.mpapp.entity.VoteEntity;
+import tom.eyre.mpapp.util.HttpConnectUtil;
 
 public class UpdateService {
 
-    private Boolean limitResults;
-    private Integer limit;
+    private static final Logger log = Logger.getLogger(String.valueOf(UpdateService.class));
 
-    public String updateMp(MpDatabase mpDatabase) throws JSONException, JsonProcessingException {
+    private AmazonDynamoDBClient dbClient;
+    private CognitoCachingCredentialsProvider credentialsProvider;
+    private ExecutorService executorService = Executors.newFixedThreadPool(4);
+
+
+    public void updateMp(MpDatabase mpDatabase) throws JSONException, JsonProcessingException {
         final String UNICODE = "\uFEFF";
         HttpConnectUtil httpConnectUtil = new HttpConnectUtil();
-        System.out.println("http://data.parliament.uk/membersdataplatform/services/mnis/members/query/house=Commons|membership=all");
-        String json = httpConnectUtil.getJSONFromUrl("http://data.parliament.uk/membersdataplatform/services/mnis/members/query/house=Commons|membership=all"/*BasicDetails*/);
-        if(json != null && !json.equalsIgnoreCase("") && !json.equalsIgnoreCase("error")){
-            JSONObject jsonObject = new JSONObject(json.replaceAll(UNICODE, "").replaceAll("ï»¿",""));
+        log.info("http://data.parliament.uk/membersdataplatform/services/mnis/members/query/house=Commons|membership=all/BasicDetails");
+        String json = httpConnectUtil.getJSONFromUrl("http://data.parliament.uk/membersdataplatform/services/mnis/members/query/house=Commons|membership=all/BasicDetails");
+        if (json != null && !json.equalsIgnoreCase("") && !json.equalsIgnoreCase("error")) {
+            JSONObject jsonObject = new JSONObject(json.replaceAll(UNICODE, "").replaceAll("ï»¿", ""));
             ObjectMapper mapper = new ObjectMapper()
                     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                     .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
-            ArrayList<MpResponse> mpEntities = mapper.readValue(jsonObject.getJSONObject("Members").getJSONArray("Member").toString(), new TypeReference<ArrayList<MpResponse>>() { });
+            ArrayList<MpResponse> mpEntities = mapper.readValue(jsonObject.getJSONObject("Members").getJSONArray("Member").toString(), new TypeReference<ArrayList<MpResponse>>() {
+            });
             BuildAndSaveMpEntities(mpEntities, mpDatabase);
         }
-        return null;
     }
 
-    public String updateDivision(MpDatabase mpDatabase) throws JsonProcessingException, JSONException {
+    public void updateDivision(MpDatabase mpDatabase) throws JsonProcessingException, JSONException {
         HttpConnectUtil httpConnect = new HttpConnectUtil();
-        System.out.println("https://lda.data.parliament.uk/commonsdivisions.json?_view=Commons+Divisions&_pageSize=5000&_page=0");
-        String json  = httpConnect.getJSONFromUrl("https://lda.data.parliament.uk/commonsdivisions.json?_view=Commons+Divisions&_pageSize=5000&_page=0");
+        log.info("https://lda.data.parliament.uk/commonsdivisions.json?_view=Commons+Divisions&_pageSize=5000&_page=0");
+        String json = httpConnect.getJSONFromUrl("https://lda.data.parliament.uk/commonsdivisions.json?_view=Commons+Divisions&_pageSize=5000&_page=0");
 
-        if(json != null && !json.equalsIgnoreCase("error")){
+        if (json != null && !json.equalsIgnoreCase("error")) {
             JSONObject jsonObject = new JSONObject(json);
             ObjectMapper mapper = new ObjectMapper()
                     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                     .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
-            ArrayList<DivisionResponse> divisionEntities = mapper.readValue(jsonObject.getJSONObject("result").getJSONArray("items").toString(), new TypeReference<ArrayList<DivisionResponse>>() { });
+            ArrayList<DivisionResponse> divisionEntities = mapper.readValue(jsonObject.getJSONObject("result").getJSONArray("items").toString(), new TypeReference<ArrayList<DivisionResponse>>() {
+            });
             BuildAndSaveDivisionEntities(divisionEntities, mpDatabase);
         }
-        return null;
     }
 
-    public String updateVotes(MpDatabase mpDatabase) throws JsonProcessingException, JSONException {
-        ArrayList<DivisionEntity> entities = (ArrayList<DivisionEntity>) mpDatabase.mpDao().getAllDivisions();
-        int count = 0;
-        for(DivisionEntity division : entities) {
-            count++;
-            HttpConnectUtil httpConnect = new HttpConnectUtil();
-            System.out.println("http://eldaddp.azurewebsites.net/commonsdivisions.json?uin=" + division.getUin());
-            String json = httpConnect.getJSONFromUrl("http://eldaddp.azurewebsites.net/commonsdivisions.json?uin=" + division.getUin());
+    public void updateBills(MpDatabase mpDatabase) {
+        HttpConnectUtil httpConnect = new HttpConnectUtil();
+        log.info("https://lda.data.parliament.uk/bills.json?_view=Bills&_pageSize=3000&_page=0");
+        String json = httpConnect.getJSONFromUrl("https://lda.data.parliament.uk/bills.json?_view=Bills&_pageSize=3000&_page=0");
 
+        try {
             if (json != null && !json.equalsIgnoreCase("error")) {
                 JSONObject jsonObject = new JSONObject(json);
                 ObjectMapper mapper = new ObjectMapper()
                         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                         .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
-                ArrayList<VoteResponse> VoteEntities = mapper.readValue(jsonObject.getJSONObject("result")
-                        .getJSONArray("items").getJSONObject(0)
-                        .getJSONArray("vote").toString(), new TypeReference<ArrayList<VoteResponse>>() {
+                JSONArray jsonArray = jsonObject.getJSONObject("result").getJSONArray("items");
+                while(!(jsonArray.get(jsonArray.length()-1) instanceof JSONObject)){ jsonArray.remove(jsonArray.length()-1); }
+                ArrayList<BillResponse> billEntities = mapper.readValue(jsonObject.getJSONObject("result").getJSONArray("items").toString(), new TypeReference<ArrayList<BillResponse>>() {
                 });
-                BuildAndSaveDivisionVoteEntities(VoteEntities, division.getUin(), mpDatabase);
+                BuildAndSaveBillEntities(billEntities, mpDatabase);
             }
-            if(limitResults && count > limit) break;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
+
+    public String updateVotes(MpDatabase mpDatabase, Context context) throws JsonProcessingException, JSONException {
+        credentialsProvider = new CognitoCachingCredentialsProvider(
+               context, context.getResources().getString(R.string.identityId), Regions.US_WEST_2);
+
+        dbClient = new AmazonDynamoDBClient(credentialsProvider);
+        dbClient.setRegion(Region.getRegion(Regions.US_WEST_2));
+        ScanRequest scanRequest = new ScanRequest()
+                .withTableName("questions");
+        ScanResult scanResult = dbClient.scan(scanRequest);
+        ArrayList<QuestionEntity> entities = buildEntities(scanResult.getItems());
+
+        for (QuestionEntity question : entities) {
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        HttpConnectUtil httpConnect = new HttpConnectUtil();
+                        log.info("https://eldaddp.azurewebsites.net/commonsdivisions.json?uin=" + question.getUin());
+                        String json = httpConnect.getJSONFromUrl("https://eldaddp.azurewebsites.net/commonsdivisions.json?uin=" + question.getUin());
+
+                        if (json != null && !json.equalsIgnoreCase("error")) {
+                            JSONObject jsonObject = new JSONObject(json);
+                            jsonObject.getJSONObject("result")
+                                    .getJSONArray("items").getJSONObject(0)
+                                    .getJSONArray("vote").remove(jsonObject.getJSONObject("result")
+                                    .getJSONArray("items").getJSONObject(0)
+                                    .getJSONArray("vote").length() - 1);
+                            ObjectMapper mapper = new ObjectMapper()
+                                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                                    .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+                            ArrayList<VoteResponse> VoteEntities = mapper.readValue(jsonObject.getJSONObject("result")
+                                    .getJSONArray("items").getJSONObject(0)
+                                    .getJSONArray("vote").toString(), new TypeReference<ArrayList<VoteResponse>>() {
+                            });
+                            BuildAndSaveDivisionVoteEntities(VoteEntities, question.getUin(), mpDatabase);
+                        }
+                    }catch (Exception e){
+                        Toast.makeText(context, "votes not updated",
+                                Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
+        executorService.shutdown();
         return null;
     }
 
-    private void BuildAndSaveMpEntities(ArrayList<MpResponse> mps, MpDatabase mpDatabase){
+    private ArrayList<QuestionEntity> buildEntities(List<Map<String, AttributeValue>> results) {
+        ArrayList<QuestionEntity> entities = new ArrayList<>();
+        Iterator<Map<String, AttributeValue>> iterator = results.iterator();
+        while (iterator.hasNext()) {
+            Map<String, AttributeValue> result = iterator.next();
+            QuestionEntity entity = new QuestionEntity();
+            entity.setUin(getResult(result, "uin"));
+            entity.setDateOfDivision(getResult(result, "date"));
+            entity.setQuestion(getResult(result, "question"));
+            entity.setTitle(getResult(result, "title"));
+            entity.setType(getResult(result, "type"));
+            entity.setOpinion(null);
+            entity.setLastUpdatedTimestamp(Long.parseLong(getResult(result, "lastUpdatedTs")));
+            entities.add(entity);
+        }
+        return entities;
+    }
+
+    private String getResult(Map<String, AttributeValue> result, String type) {
+        return result.get(type).toString().substring(
+                result.get(type).toString().indexOf(":") + 2,
+                result.get(type).toString().lastIndexOf(","));
+    }
+
+    private void BuildAndSaveMpEntities(ArrayList<MpResponse> mps, MpDatabase mpDatabase) {
         List<MpEntity> entities = new ArrayList<>();
         List<MpEntity> currentMps = mpDatabase.mpDao().getAllMps();
-        for(MpResponse mp : mps){
-            if(mps == null || mps.isEmpty() ||
+        for (MpResponse mp : mps) {
+            if (mps == null || mps.isEmpty() ||
                     (mps != null && !mps.isEmpty() && !containsId(currentMps, mp.getMemberId()))) {
                 MpEntity entity = new MpEntity();
                 entity.setId(mp.getMemberId());
-                entity.setName(mp.getDisplayAs());
+                entity.setForename(mp.getBasicDetails().getForename());
+                entity.setSurname(mp.getBasicDetails().getSurname());
                 entity.setParty(mp.getParty().getText());
                 entity.setMpFor(mp.getMemberFrom());
+                entity.setFullName(mp.getDisplayAs());
                 entity.setActive(mp.getCurrentStatus().getActive());
                 entity.setGender(mp.getGender());
                 entity.setDateOfBirth(mp.getDateOfBirth() instanceof String ? mp.getDateOfBirth().toString() : "");
                 entity.setDateOfDeath(mp.getDateOfDeath() instanceof String ? mp.getDateOfBirth().toString() : "");
                 entity.setHouseStartDate(mp.getHouseStartDate() instanceof String ? mp.getHouseStartDate().toString() : "");
+                entity.setHouseEndDate(mp.getHouseEndDate() instanceof String ? mp.getHouseEndDate().toString() : "");
+                entity.setLastUpdatedTimestamp(new Date().getTime());
                 entities.add(entity);
             }
         }
-        if(entities.size() > 0) {
+        if (entities.size() > 0) {
             mpDatabase.mpDao().insertAllMps(entities);
         }
     }
@@ -109,6 +209,40 @@ public class UpdateService {
     private static boolean containsId(List<MpEntity> currentMps, Integer id) {
         for (MpEntity object : currentMps) {
             if (object.getId().equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void BuildAndSaveBillEntities(ArrayList<BillResponse> bills, MpDatabase mpDatabase) {
+        ArrayList<BillsEntity> entities = new ArrayList<>();
+        List<BillsEntity> currentBills = mpDatabase.mpDao().getAllBills();
+        for (BillResponse bill : bills) {
+            if (currentBills == null || currentBills.isEmpty() ||
+                    (currentBills != null && !currentBills.isEmpty() && !containsTitle(currentBills, bill.getTitle()))) {
+                BillsEntity billsEntity = new BillsEntity();
+                billsEntity.setUrl(bill.getHomePage());
+                billsEntity.setTitle(bill.getTitle() != null ? bill.getTitle() : "");
+                if(bill.getSponsors() != null && !bill.getSponsors().isEmpty()) {
+                    billsEntity.setSponsorAId(bill.getSponsors().get(0).getSponsorPrinted().get(0));
+                    if(bill.getSponsors().size() > 1) {
+                        billsEntity.setSponsorBId(bill.getSponsors().get(1).getSponsorPrinted().get(0));
+                    }
+                }
+                billsEntity.setBillDate(bill.getDate().getValue());
+                billsEntity.setLastUpdatedTimestamp(new Date().getTime());
+                entities.add(billsEntity);
+            }
+        }
+        if (entities.size() > 0) {
+            mpDatabase.mpDao().insertAllBills(entities);
+        }
+    }
+
+    private Boolean containsTitle(List<BillsEntity> currentBills, String title){
+        for(BillsEntity bill: currentBills){
+            if(bill.getTitle().equalsIgnoreCase(title)){
                 return true;
             }
         }
@@ -125,6 +259,7 @@ public class UpdateService {
                 entity.setUin(division.getUin());
                 entity.setDate(division.getDate().getValue());
                 entity.setTitle(division.getTitle());
+                entity.setLastUpdatedTimestamp(new Date().getTime());
                 entities.add(entity);
             }
         }
@@ -142,7 +277,7 @@ public class UpdateService {
         return false;
     }
 
-    private void BuildAndSaveDivisionVoteEntities(ArrayList<VoteResponse> votes, String uin, MpDatabase mpDatabase){
+    synchronized private void BuildAndSaveDivisionVoteEntities(ArrayList<VoteResponse> votes, String uin, MpDatabase mpDatabase){
         ArrayList<VoteEntity> entities = new ArrayList<>();
         for(VoteResponse vote : votes){
             VoteEntity entity = new VoteEntity();
@@ -150,6 +285,7 @@ public class UpdateService {
             entity.setMpId(Integer.parseInt(vote.getMember().get(0).getAbout().substring(vote.getMember().get(0).getAbout().lastIndexOf("/") + 1).trim()));
             entity.setResult(vote.getResult().substring(vote.getResult().lastIndexOf("#") + 1).trim());
             entity.setParty(vote.getParty());
+            entity.setLastUpdatedTimestamp(new Date().getTime());
             entities.add(entity);
         }
         mpDatabase.mpDao().insertAllVotes(entities);

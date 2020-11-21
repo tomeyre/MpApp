@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/white"
+    tools:context=".fragment.ui.mpexpensesvotes.mpdetails.MpDetails">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/topView"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                app:cardBackgroundColor="@color/parlimentGreen"/>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/mpOuterCardView"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="30dp"
+                app:cardBackgroundColor="@color/cardview_light_background"
+                app:cardCornerRadius="100dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="176dp"
+                        android:layout_height="176dp"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
+                        app:cardCornerRadius="88dp">
+
+                        <ImageView
+                            android:id="@+id/mpImage"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+                    </androidx.cardview.widget.CardView>
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:layout_below="@+id/mpOuterCardView"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:text="name"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:id="@+id/mpName"
+                android:textColor="@color/black"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:id="@+id/ll"
+                android:layout_below="@+id/mpName"
+                android:weightSum="2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_below="@+id/mpAge"
+                android:weightSum="2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginBottom="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:textSize="15sp"
+                    android:text="age"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:id="@+id/mpAge"/>
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:textSize="15sp"
+                    android:text="party"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/mpParty"/>
+
+            </LinearLayout>
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:textSize="15sp"
+                    android:textAlignment="textEnd"
+                    android:text="constituency"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/mpFor"/>
+
+
+            </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/bioLayout"
+            android:layout_below="@+id/ll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cvbp"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="4dp"
+                app:cardBackgroundColor="@color/black"/>
+
+            <TextView
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:text="Biography"
+                android:textStyle="bold"
+                android:layout_margin="10dp"
+                android:layout_below="@+id/cvbp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/bioTitle"/>
+
+            <TextView
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                android:text="bio"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_below="@+id/bioTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/mpBio"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/socialLayout"
+            android:layout_below="@+id/bioLayout"
+            android:layout_marginBottom="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cvbp2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="4dp"
+                app:cardBackgroundColor="@color/black"/>
+
+            <TextView
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:text="Social Media"
+                android:textStyle="bold"
+                android:layout_margin="10dp"
+                android:layout_below="@+id/cvbp2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/socialTitle"/>
+
+            <TextView
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                android:text="home page"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:autoLink="web"
+                android:layout_below="@+id/socialTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/mpHomePage"/>
+
+            <TextView
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                android:text="twitter"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:autoLink="web"
+                android:layout_below="@+id/mpHomePage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/mpTwitter"/>
+
+            <ImageView
+                android:id="@+id/twitterImage"
+                android:layout_margin="5dp"
+                android:src="@drawable/twitter"
+                android:layout_below="@+id/mpHomePage"
+                android:layout_toRightOf="@+id/mpTwitter"
+                android:layout_width="20dp"
+                android:layout_height="20dp"/>
+
+        </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/billsLayout"
+                android:layout_below="@+id/socialLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cvbp3"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                app:cardBackgroundColor="@color/black"/>
+
+            <TextView
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:text="Sponsored Bills"
+                android:textStyle="bold"
+                android:layout_margin="10dp"
+                android:layout_below="@+id/cvbp3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/sponsoredBillsTitle"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_margin="10dp"
+                android:layout_below="@+id/sponsoredBillsTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/mpBillRv"/>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+    </ScrollView>
+</RelativeLayout>

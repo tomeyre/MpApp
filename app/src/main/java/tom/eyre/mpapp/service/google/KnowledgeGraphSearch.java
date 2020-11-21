@@ -1,15 +1,14 @@
 package tom.eyre.mpapp.service.google;
 
-import tom.eyre.yourvotematters.data.google.Query;
-import tom.eyre.yourvotematters.util.HttpConnectUtil;
+import tom.eyre.mpapp.data.google.Query;
+import tom.eyre.mpapp.entity.MpEntity;
+import tom.eyre.mpapp.util.HttpConnectUtil;
 
 public class KnowledgeGraphSearch {
 
-    public String searchForName(String name, String apiKey) {
+    public String searchForName(MpEntity mp, String apiKey) {
         HttpConnectUtil httpConnectUtil = new HttpConnectUtil();
-        String firstName = name.split(" ")[name.split(" ").length-2];
-        String lastName = name.split(" ")[name.split(" ").length-1];
-        Query knowledgeSearchQuery = Query.ofPerson().firstName(firstName).lastName(lastName).apiKey(apiKey).build();
+        Query knowledgeSearchQuery = Query.ofPerson().firstName(mp.getForename()).lastName(mp.getSurname()).apiKey(apiKey).build();
         return httpConnectUtil.getJSONFromUrl(knowledgeSearchQuery.getUrl());
     }
 }

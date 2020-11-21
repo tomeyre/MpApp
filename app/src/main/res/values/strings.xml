@@ -1,5 +1,22 @@
 <resources>
-    <string name="app_name">YourVoteMatters</string>
+    <string name="app_name">Your Vote Matters</string>
+
+    <string name="title_mp_select">MP</string>
+    <string name="title_mp_compare">Compare</string>
+    <string name="title_party_select">Party</string>
+    <string name="title_quiz">Quiz</string>
+
+    <string name="title_home">Home</string>
+    <string name="title_mp_details">MP</string>
+    <string name="title_expenses">Expenses</string>
+    <string name="title_vote">Votes</string>
+
     <string name="search_hint">hint</string>
+
     <string name="app_label">search</string>
+
+    <string name="apiKey">AIzaSyC-dxtytINHkWAzmSMnQiKwxwbQ35vHBLM</string>
+
+    <string name="first_time">true</string>
+
 </resources>

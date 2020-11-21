@@ -4,12 +4,16 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.Date;
+
 import lombok.Data;
 import lombok.NonNull;
 
 @Data
 @Entity
 public class ExpenseEntity {
+
+    public ExpenseEntity(){}
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
@@ -19,72 +23,76 @@ public class ExpenseEntity {
     @ColumnInfo(name = "mpId")
     private Integer mpId;
 
-    @ColumnInfo(name = "Year")
+    @ColumnInfo(name = "year")
     private String year;
 
-    @ColumnInfo(name = "Date")
+    @ColumnInfo(name = "date")
     private String date;
 
-    @ColumnInfo(name = "Claim No.")
+    @ColumnInfo(name = "claimNo")
     private String claimNo;
 
-    @ColumnInfo(name = "MP's Name")
+    @ColumnInfo(name = "mPsName")
     private String mpName;
 
-    @ColumnInfo(name = "MP's Constituency")
+    @ColumnInfo(name = "mPsConstituency")
     private String mpsConstituency;
 
-    @ColumnInfo(name = "Category")
+    @ColumnInfo(name = "category")
     private String category;
 
-    @ColumnInfo(name = "Expense Type")
+    @ColumnInfo(name = "expenseType")
     private String expenseType;
 
-    @ColumnInfo(name = "Short Description")
+    @ColumnInfo(name = "shortDescription")
     private String shortDescription;
 
-    @ColumnInfo(name = "Details")
+    @ColumnInfo(name = "details")
     private String details;
 
-    @ColumnInfo(name = "Journey Type")
+    @ColumnInfo(name = "journeyType")
     private String journeyType;
 
-    @ColumnInfo(name = "From")
+    @ColumnInfo(name = "from")
     private String from;
 
-    @ColumnInfo(name = "To")
+    @ColumnInfo(name = "to")
     private String to;
 
-    @ColumnInfo(name = "Travel")
+    @ColumnInfo(name = "travel")
     private String travel;
 
-    @ColumnInfo(name = "Nights")
+    @ColumnInfo(name = "nights")
     private Integer nights;
 
-    @ColumnInfo(name = "Mileage")
+    @ColumnInfo(name = "mileage")
     private Integer mileage;
 
-    @ColumnInfo(name = "Amount Claimed")
+    @ColumnInfo(name = "amountClaimed")
     private Double amountClaimed;
 
-    @ColumnInfo(name = "Amount Paid")
+    @ColumnInfo(name = "amountPaid")
     private Double amountPaid;
 
-    @ColumnInfo(name = "Amount Not Paid")
+    @ColumnInfo(name = "amountNotPaid")
     private Double amountNotPaid;
 
-    @ColumnInfo(name = "Amount Repaid")
+    @ColumnInfo(name = "amountRepaid")
     private Double amountRepaid;
 
-    @ColumnInfo(name = "Status")
+    @ColumnInfo(name = "status")
     private String status;
 
-    @ColumnInfo(name = "Reason If Not Paid")
+    @ColumnInfo(name = "reasonIfNotPaid")
     private String reasonIfNotPaid;
 
-    @ColumnInfo(name = "Supply Month")
+    @ColumnInfo(name = "supplyMonth")
     private Integer supplyMonth;
 
-    @ColumnInfo(name = "Supply Period")
+    @ColumnInfo(name = "supplyPeriod")
     private Integer supplyPeriod;
+
+    @ColumnInfo(name = "lastUpdatedTs")
+    @androidx.annotation.NonNull
+    private Long lastUpdatedTimestamp;
 }

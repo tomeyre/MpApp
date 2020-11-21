@@ -10,9 +10,7 @@ public class ExpenseResponse {
     @JsonProperty(value = "Amount Paid")
     private double amountPaid;
     @JsonProperty(value = "Status")
-    private Boolean paid(String status){
-        return status.equalsIgnoreCase("paid") ? true : false;
-    }
+    private String status;
     @JsonProperty(value = "Amount Claimed")
     private double amountClaimed;
     @JsonProperty(value = "Supply Month")

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/back">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:isScrollContainer="false"
+        android:paddingRight="13dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/parliament_chamber" />
+
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:isScrollContainer="false"
+        android:translationZ="1dp"
+        android:scaleType="centerCrop"
+        android:src="@color/transparent_black" />
+
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/searchCv"
+        android:background="@color/white"
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_width="match_parent"
+        android:translationZ="1dp"
+        android:layout_height="70dp">
+
+        <SearchView
+            android:queryHint="Mp search by name, party, area"
+            android:layout_gravity="center"
+            android:id="@+id/search"
+            android:layout_width="fill_parent"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_height="wrap_content"
+            android:background="@color/cardview_light_background"
+            android:iconifiedByDefault="false"
+            android:queryBackground="@color/white"></SearchView>
+    </com.google.android.material.card.MaterialCardView>
+
+    <ListView
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:id="@+id/listview"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_below="@+id/searchCv"
+        android:scrollbars="none"
+        android:translationZ="1dp" />
+
+    <RelativeLayout
+        android:id="@+id/mpView2"
+        android:visibility="invisible"
+        android:layout_below="@+id/searchCv"
+        android:layout_above="@+id/compareMps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/searchCvB"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="30dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_width="match_parent"
+        android:translationZ="1dp"
+        android:layout_height="70dp">
+
+        <SearchView
+            android:queryHint="Search"
+            android:layout_gravity="center"
+            android:id="@+id/searchB"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/cardview_light_background"
+            android:iconifiedByDefault="false"
+            android:queryBackground="@color/white"></SearchView>
+    </androidx.cardview.widget.CardView>
+
+    <ListView
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:id="@+id/listviewB"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_below="@+id/searchCvB"
+        android:scrollbars="none"
+        android:translationZ="1dp" />
+    </RelativeLayout>
+
+    <Button
+        android:visibility="invisible"
+        android:layout_margin="10dp"
+        android:textColor="@color/white"
+        android:background="@color/parlimentGreen"
+        android:text="Compare"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/compareMps"
+        android:layout_width="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_height="wrap_content"/>
+
+
+</RelativeLayout>
